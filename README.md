@@ -6,12 +6,10 @@ wget -qO- https://raw.githubusercontent.com/ritey/booter/master/booter.sh | bash
 
 Argument options include:
 
-SITENAME="website"
-DOMAIN="website"
-PASSWORD='123456789!'
+1. SITENAME="website"
+2. DOMAIN="website"
+3. PASSWORD='123456789!'
 
 For example:
-
-https://raw.githubusercontent.com/ritey/booter/master/README.md
 
 wget -qO- https://raw.githubusercontent.com/ritey/booter/master/booter.sh | SITENAME=GitHub DOMAIN=github.com PASSWORD=password123 bash
