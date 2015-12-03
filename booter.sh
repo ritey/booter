@@ -14,12 +14,17 @@ if [ -z "$PASSWORD" ]; then
   PASSWORD='123456789!'
 fi
 
-echo "****************** Creating apache conf file ******************"
+if [ -z "$IPADDRESS" ]; then
+  IPADDRESS=""
+fi
+
+
+echo "****************** Creating Apache conf file ******************"
 
 cat <<EOF > /etc/apache2/sites-available/$SITENAME.conf
 <VirtualHost *:80>
 	Servername $DOMAIN
-	DocumentRoot /var/www/$SITENAME/webroot/
+	DocumentRoot "/var/www/$SITENAME/webroot/"
 	DirectoryIndex index.php
 
 	<Directory />
@@ -29,7 +34,7 @@ cat <<EOF > /etc/apache2/sites-available/$SITENAME.conf
 
 	LogLevel warn
 	ErrorLog /var/www/$SITENAME/logs/error.log
-	CustomLog /var/www/$SITENAME/logs/access.log
+	CustomLog /var/www/$SITENAME/logs/access.log combined
 </VirtualHost>
 EOF
 
@@ -39,6 +44,10 @@ echo "****************** Creating site folder ******************"
 mkdir "/var/www/$SITENAME/"
 mkdir "/var/www/$SITENAME/logs"
 chown www-data:www-data "/var/www/$SITENAME/logs"
+
+echo "****************** Enabling new site ******************"
+
+a2ensite $SITENAME
 
 echo "****************** Updating server software ******************"
 
@@ -71,7 +80,12 @@ mv composer.phar /usr/local/bin/composer
 
 echo "****************** Setting Up IPTABLES ******************"
 
+if [ -n $IPADDRESS ]; then
+iptables -A INPUT -p tcp -s $IPADDRESS --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j DROP
+else
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+fi
 iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 iptables -A INPUT -p tcp --dport 111 -j ACCEPT
 iptables -A INPUT -p udp --dport 111 -j ACCEPT
