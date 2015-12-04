@@ -78,9 +78,9 @@ echo "****************** Installing Composer software ******************"
 curl -s https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
-echo "****************** Setting Up IPTABLES ******************"
+echo "****************** Setting up IPTABLES ******************"
 
-if [ -n $IPADDRESS ]; then
+if [ -n "$IPADDRESS" ]; then
 iptables -A INPUT -p tcp -s $IPADDRESS --dport 22 -j ACCEPT
 iptables -A INPUT -p tcp --dport 22 -j DROP
 else
