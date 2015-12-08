@@ -45,10 +45,6 @@ mkdir "/var/www/$SITENAME/"
 mkdir "/var/www/$SITENAME/logs"
 chown www-data:www-data "/var/www/$SITENAME/logs"
 
-echo "****************** Enabling new site ******************"
-
-a2ensite $SITENAME
-
 echo "****************** Updating server software ******************"
 
 # update / upgrade
@@ -57,6 +53,10 @@ apt-get -y upgrade
 
 # install apache 2.5 and php 5.5
 apt-get install -y apache2 php5 curl iptables php5-curl php5-mcrypt php5-gd php-pear php5-imagick build-essential openssl apt-show-versions libapache2-mod-evasive git
+
+echo "****************** Enabling new site ******************"
+
+a2ensite $SITENAME
 
 echo "****************** Installing MySql software ******************"
 
