@@ -30,9 +30,6 @@ EOF
 # Load php5-fpm config.
 a2enconf php5-fpm
 
-# Reload apache.
-service apache2 reload
-
 # Create website config.
 echo "****************** Creating Apache conf file ******************"
 

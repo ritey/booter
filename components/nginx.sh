@@ -5,7 +5,7 @@
 wget -qO - http://nginx.org/keys/nginx_signing.key | apt-key add -
 
 # Add repository.
-add-apt-repository "http://nginx.org/packages/debian/ $CODENAME nginx"
+add-apt-repository "http://nginx.org/packages/debian/ nginx"
 
 # Update system repos with nginx.
 apt-get update

@@ -31,15 +31,14 @@ echo "****************** Install prerequisites ******************"
 # git-core - to clone stuff from git;
 apt-get install software-properties-common lsb-release git-core curl iptables  build-essential openssl apt-show-versions libapache2-mod-evasive sed -y
 
-# Get Debian codename.
-CODENAME="$(lsb_release -sc)"
-
 # Export vars to external scripts.
-export $CODENAME
 export $PASSWORD
 export $IPADDRESS
 export $DOMAIN
 export $SITENAME
+
+# add non-free repository. At the moment for libapache2-mod-fastcgi.
+add-apt-repository "http://http.us.debian.org/debian main non-free"
 
 echo "****************** Creating site folder ******************"
 
