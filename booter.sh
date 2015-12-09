@@ -29,17 +29,17 @@ echo "****************** Install prerequisites ******************"
 # software-properties-common - for apt-key command;
 # lsb_release package - to get codename;
 # git-core - to clone stuff from git;
-apt-get install software-properties-common lsb-release git-core curl iptables  build-essential openssl apt-show-versions libapache2-mod-evasive -y
+apt-get install software-properties-common lsb-release git-core curl iptables  build-essential openssl apt-show-versions libapache2-mod-evasive sed -y
 
 # Get Debian codename.
 CODENAME="$(lsb_release -sc)"
 
 # Export vars to external scripts.
-export CODENAME
-export PASSWORD
-export IPADDRESS
-export DOMAIN
-export SITENAME
+export $CODENAME
+export $PASSWORD
+export $IPADDRESS
+export $DOMAIN
+export $SITENAME
 
 echo "****************** Creating site folder ******************"
 
@@ -69,12 +69,12 @@ echo "****************** Setting up IPTABLES ******************"
 sh ./components/firewall.sh
 
 # Apache install instructions.
-if [ SERVER == 'apache' ]; then
+if [ $SERVER == 'apache' ]; then
 
 sh ./components/apache.sh
 
 # Nginx install instructions.
-elif [ SERVER == 'nginx' ]; then
+elif [ $SERVER == 'nginx' ]; then
 
 sh ./components/nginx.sh
 

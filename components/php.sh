@@ -11,3 +11,9 @@ post_max_size = 20MB
 upload_max_filesize = 20MB
 max_file_uploads = 6
 EOF
+
+# backup php.ini file.
+cp /etc/php5/fpm/php.ini /etc/php5/fpm/php.ini.backup
+
+# modify php5-fpm config file.
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php5/fpm/php.ini
