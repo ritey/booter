@@ -58,6 +58,10 @@ echo "****************** Installing MySql software ******************"
 
 sh ./components/mysql.sh
 
+echo "****************** Installing PHP5-FPM ******************"
+
+sh ./components/php.sh
+
 echo "****************** Installing Composer software ******************"
 
 # install Composer
