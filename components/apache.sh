@@ -9,7 +9,8 @@ a2dismod mpm_prefork
 # disable classic php exec.
 a2dismod mod_php
 
-a2enmod mpm_worker actions fastcgi alias
+# enable modules.
+a2enmod mpm_worker actions fastcgi alias rewrite
 
 echo "****************** Creating Apache php conf file ******************"
 
@@ -55,9 +56,6 @@ EOF
 echo "****************** Enabling new site ******************"
 
 a2ensite $SITENAME
-
-# enable mod_rewrite
-a2enmod rewrite
 
 # restart apache
 service apache2 restart
