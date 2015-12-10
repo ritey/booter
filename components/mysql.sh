@@ -5,7 +5,7 @@
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
 
 # Add repository.
-add-apt-repository 'deb [arch=amd64,i386] http://lon1.mirrors.digitalocean.com/mariadb/repo/10.1/debian main'
+add-apt-repository "deb [arch=amd64,i386] http://lon1.mirrors.digitalocean.com/mariadb/repo/10.1/debian $CODENAME main"
 
 apt-get update
 
@@ -14,4 +14,4 @@ debconf-set-selections <<< "mariadb-server-10.1 mysql-server/root_password passw
 debconf-set-selections <<< "mariadb-server-10.1 mysql-server/root_password_again password $PASSWORD"
 
 # Install.
-apt-get install mariadb-server
+apt-get install -y mariadb-server
