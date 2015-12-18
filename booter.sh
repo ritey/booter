@@ -18,25 +18,37 @@ if [ -z "$IPADDRESS" ]; then
   IPADDRESS=""
 fi
 
+# Check server to install.
+# Default to apache.
+if [ -z "$SERVER" ] || [ $SERVER != "apache" ] || [ $SERVER != "nginx" ]; then
+  SERVER="apache"
+fi
 
-echo "****************** Creating Apache conf file ******************"
+# Check PHP version to install.
+# Default to php 5.6 (Debian Jessie).
+if [ -z "$PHP" ] || [ $PHP != "7.0" ]; then
+  PHP="5.6"
+fi
 
-cat <<EOF > /etc/apache2/sites-available/$SITENAME.conf
-<VirtualHost *:80>
-	Servername $DOMAIN
-	DocumentRoot "/var/www/$SITENAME/webroot/"
-	DirectoryIndex index.php
+# Common tasks for both servers.
+echo "****************** Install prerequisites ******************"
+# software-properties-common - for apt-key command;
+# lsb_release package - to get codename;
+# git-core - to clone stuff from git;
+apt-get install software-properties-common lsb-release git-core curl iptables  build-essential openssl apt-show-versions libapache2-mod-evasive sed -y
 
-	<Directory />
-		Options +FollowSymLinks -Indexes
-		AllowOverride All
-	</Directory>
+CODENAME="$(lsb_release -sc)"
 
-	LogLevel warn
-	ErrorLog /var/www/$SITENAME/logs/error.log
-	CustomLog /var/www/$SITENAME/logs/access.log combined
-</VirtualHost>
-EOF
+# Export vars to external scripts.
+export $PASSWORD
+export $IPADDRESS
+export $DOMAIN
+export $SITENAME
+export $PHP
+export $CODENAME
+
+# add non-free repository. At the moment for libapache2-mod-fastcgi.
+add-apt-repository "http://http.us.debian.org/debian main non-free"
 
 echo "****************** Creating site folder ******************"
 
@@ -51,26 +63,13 @@ echo "****************** Updating server software ******************"
 apt-get update
 apt-get -y upgrade
 
-# install apache 2.5 and php 5.5
-apt-get install -y apache2 php5 curl iptables php5-curl php5-mcrypt php5-gd php-pear php5-imagick build-essential openssl apt-show-versions libapache2-mod-evasive git
-
-echo "****************** Enabling new site ******************"
-
-a2ensite $SITENAME
-
 echo "****************** Installing MySql software ******************"
 
-# install mysql and give password to installer
-debconf-set-selections <<< "mysql-server mysql-server/root_password password $PASSWORD"
-debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $PASSWORD"
-apt-get -y install mysql-server
-apt-get install php5-mysql
+sh ./components/mysql.sh
 
-# enable mod_rewrite
-a2enmod rewrite
+echo "****************** Installing PHP5-FPM ******************"
 
-# restart apache
-service apache2 restart
+sh ./components/php.sh
 
 echo "****************** Installing Composer software ******************"
 
@@ -80,39 +79,36 @@ mv composer.phar /usr/local/bin/composer
 
 echo "****************** Setting up IPTABLES ******************"
 
-if [ -n "$IPADDRESS" ]; then
-iptables -A INPUT -p tcp -s $IPADDRESS --dport 22 -j ACCEPT
-iptables -A INPUT -p tcp --dport 22 -j DROP
-else
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+sh ./components/firewall.sh
+
+# Apache install instructions.
+if [ $SERVER == 'apache' ]; then
+
+sh ./components/apache.sh
+
+# Nginx install instructions.
+elif [ $SERVER == 'nginx' ]; then
+
+sh ./components/nginx.sh
+
 fi
-iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-iptables -A INPUT -p tcp --dport 111 -j ACCEPT
-iptables -A INPUT -p udp --dport 111 -j ACCEPT
-iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
-iptables -A INPUT -p tcp --dport 24007:24011 -j ACCEPT
-iptables -A INPUT -p icmp -j ACCEPT
-iptables -A INPUT -s 127.0.0.1 -j ACCEPT
-iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A FORWARD -i eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A OUTPUT -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -j REJECT
-iptables -A FORWARD -j REJECT
 
-iptables-save > /etc/iptables.rules
+# Install Drush
+if [ -n "$DRUSH" ]; then
 
-echo "****************** Editing PHP config ******************"
+# Download latest stable release using the code below or browse to github.com/drush-ops/drush/releases.
+wget http://files.drush.org/drush.phar
+# Or use our upcoming release: wget http://files.drush.org/drush-unstable.phar
 
-cat <<EOF > /etc/php5/apache2/conf.d/extra.ini
-memory_limit = 256MB
-post_max_size = 20MB
-upload_max_filesize = 20MB
-max_file_uploads = 6
-EOF
+# Test your install.
+php drush.phar core-status
 
-echo "****************** Reloading Apache ******************"
+# Rename to `drush` instead of `php drush.phar`. Destination can be anywhere on $PATH.
+chmod +x drush.phar
+sudo mv drush.phar /usr/local/bin/drush
 
-service apache2 restart
+# Enrich the bash startup file with completion and aliases.
+drush init
 
+fi
 } # this ensures the entire script is downloaded #
