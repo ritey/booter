@@ -135,6 +135,7 @@ cat << FOE >> /etc/logrotate.d/apache2
 		fi; \
 	endscript
 }
+FOE
 
 echo "****************** Reloading Apache ******************"
 
