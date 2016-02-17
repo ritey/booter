@@ -43,7 +43,7 @@ echo "****************** Creating site folder ******************"
 # create project folder
 mkdir "/var/www/$SITENAME/"
 mkdir "/var/www/$SITENAME/logs"
-chown www-data:www-data "/var/www/$SITENAME/logs"
+chown root:www-data "/var/www/$SITENAME/logs"
 
 echo "****************** Updating server software ******************"
 
@@ -51,8 +51,8 @@ echo "****************** Updating server software ******************"
 apt-get update
 apt-get -y upgrade
 
-# install apache 2.5 and php 5.5
-apt-get install -y apache2 php5 curl iptables php5-curl php5-mcrypt php5-gd php-pear php5-imagick build-essential openssl apt-show-versions libapache2-mod-evasive git
+# install additional software
+apt-get install -y apache2 php5 makepasswd curl iptables php5-curl php5-mcrypt php5-gd php-pear php5-imagick build-essential openssl apt-show-versions libapache2-mod-evasive git
 
 echo "****************** Enabling new site ******************"
 
@@ -110,6 +110,31 @@ post_max_size = 20M
 upload_max_filesize = 20M
 max_file_uploads = 6
 EOF
+
+echo "****************** Setting Custom Log Rotation Config ******************"
+
+cat << FOE >> /etc/logrotate.d/apache2
+
+/var/www/$SITENAME/logs/*.log {
+	daily
+	missingok
+	rotate 14
+	compress
+	delaycompress
+	notifempty
+	create 640 root adm
+	sharedscripts
+	postrotate
+                if /etc/init.d/apache2 status > /dev/null ; then \
+                    /etc/init.d/apache2 reload > /dev/null; \
+                fi;
+	endscript
+	prerotate
+		if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+			run-parts /etc/logrotate.d/httpd-prerotate; \
+		fi; \
+	endscript
+}
 
 echo "****************** Reloading Apache ******************"
 
